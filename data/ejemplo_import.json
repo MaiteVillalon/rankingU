@@ -1,0 +1,30 @@
+{
+  "profesores": [
+    { "nombre": "Juan Pérez González", "departamento": "Departamento de Computación", "email": "jperez@pucv.cl" },
+    { "nombre": "María Torres Vidal", "departamento": "Departamento de Computación", "email": "mtorres@pucv.cl" },
+    { "nombre": "Carlos Rojas Fuentes", "departamento": "Departamento de Matemáticas", "email": "crojas@pucv.cl" }
+  ],
+  "ramos": [
+    {
+      "nombre": "Introducción a la Programación",
+      "codigo": "ICI-1101",
+      "creditos": 10,
+      "carrera_codigo": "ICI",
+      "profesores": ["Juan Pérez González", "María Torres Vidal"]
+    },
+    {
+      "nombre": "Bases de Datos",
+      "codigo": "ICI-2201",
+      "creditos": 10,
+      "carrera_codigo": "ICI",
+      "profesores": ["Juan Pérez González"]
+    },
+    {
+      "nombre": "Cálculo Diferencial e Integral",
+      "codigo": "MAT-ICI-1",
+      "creditos": 8,
+      "carrera_codigo": "ICI",
+      "profesores": ["Carlos Rojas Fuentes"]
+    }
+  ]
+}
