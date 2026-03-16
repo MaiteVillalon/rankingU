@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
-import { BookOpen, Users, Star, ArrowRight, GraduationCap, MessageSquare } from 'lucide-react'
+import { BookOpen, Users, Star, ArrowRight, GraduationCap, MessageSquare, Library } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import type { Facultad } from '@/types'
@@ -21,10 +21,11 @@ const FACULTY_COLORS = [
 export default async function HomePage() {
   const supabase = await createClient()
 
-  const [{ data: facultades }, { count: totalProfesores }, { count: totalReviews }] =
+  const [{ data: facultades }, { count: totalProfesores }, { count: totalRamos }, { count: totalReviews }] =
     await Promise.all([
       supabase.from('facultades').select('*').order('nombre'),
       supabase.from('profesores').select('*', { count: 'exact', head: true }),
+      supabase.from('ramos').select('*', { count: 'exact', head: true }),
       supabase.from('reviews_profesores').select('*', { count: 'exact', head: true }),
     ])
 
@@ -66,7 +67,7 @@ export default async function HomePage() {
 
       {/* Stats */}
       <section className="max-w-4xl mx-auto px-4 -mt-8 relative z-10">
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           <Card className="shadow-lg border-0">
             <CardContent className="p-6 text-center">
               <Users className="w-8 h-8 mx-auto mb-2 text-blue-600 dark:text-blue-400" />
@@ -76,7 +77,14 @@ export default async function HomePage() {
           </Card>
           <Card className="shadow-lg border-0">
             <CardContent className="p-6 text-center">
-              <BookOpen className="w-8 h-8 mx-auto mb-2 text-purple-600 dark:text-purple-400" />
+              <Library className="w-8 h-8 mx-auto mb-2 text-purple-600 dark:text-purple-400" />
+              <div className="text-3xl font-bold">{totalRamos ?? 0}</div>
+              <div className="text-sm text-muted-foreground mt-1">Ramos</div>
+            </CardContent>
+          </Card>
+          <Card className="shadow-lg border-0">
+            <CardContent className="p-6 text-center">
+              <BookOpen className="w-8 h-8 mx-auto mb-2 text-emerald-600 dark:text-emerald-400" />
               <div className="text-3xl font-bold">{facultades?.length ?? 0}</div>
               <div className="text-sm text-muted-foreground mt-1">Facultades</div>
             </CardContent>
