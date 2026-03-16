@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import type { SupabaseClient } from '@supabase/supabase-js'
 
 /**
@@ -62,19 +62,27 @@ async function importProfesores(
   supabase: AnyClient,
   profesores: ProfesorInput[]
 ): Promise<{ count: number; errores: string[] }> {
-  let count = 0
   const errores: string[] = []
+  const valid = profesores.filter((p) => !!p.nombre)
+  if (!valid.length) return { count: 0, errores }
 
-  for (const p of profesores) {
-    if (!p.nombre) continue
-    const { error } = await supabase
+  const rows = valid.map((p) => ({
+    nombre: p.nombre,
+    departamento: p.departamento ?? null,
+    email: p.email ?? null,
+  }))
+
+  // Batch upsert in chunks of 100
+  const CHUNK = 100
+  let count = 0
+  for (let i = 0; i < rows.length; i += CHUNK) {
+    const chunk = rows.slice(i, i + CHUNK)
+    const { error, data } = await supabase
       .from('profesores')
-      .upsert(
-        { nombre: p.nombre, departamento: p.departamento ?? null, email: p.email ?? null },
-        { onConflict: 'email', ignoreDuplicates: true }
-      )
-    if (error) errores.push(`Profesor "${p.nombre}": ${error.message}`)
-    else count++
+      .upsert(chunk, { onConflict: 'email', ignoreDuplicates: true })
+      .select('id')
+    if (error) errores.push(`Batch ${i / CHUNK + 1}: ${error.message}`)
+    else count += data?.length ?? chunk.length
   }
 
   return { count, errores }
@@ -146,7 +154,7 @@ export async function POST(request: NextRequest) {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const supabase = (await createClient()) as unknown as AnyClient
+  const supabase = createAdminClient() as unknown as AnyClient
   const contentType = request.headers.get('content-type') ?? ''
   const type = request.nextUrl.searchParams.get('type')
 
